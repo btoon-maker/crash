@@ -139,18 +139,17 @@
       object-position: center center;
     }
 
-    #car-img {
-      position: absolute;
-      bottom: 18px;
-      /* Start position: left edge, centered vertically */
-      left: 2%;
-      height: 130px;
-      width: auto;
-      object-fit: contain;
-      transition: none;
-      z-index: 5;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-    }
+#car-img {
+  position: absolute;
+  bottom: 26px;
+  left: 6%;
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+  transition: none;
+  z-index: 5;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55));
+}
 
     /* Crash flash overlay */
     #crash-flash {
@@ -673,10 +672,10 @@
     // NOTE: If your barrier image is at a different horizontal position,
     // adjust the targetPct below (0.0 = left edge, 1.0 = right edge)
     // ============================================================
-    const targetPct = 0.68;
+const targetPct = 0.82;
     const targetLeft = sceneW * targetPct - carW;
 
-    const startLeft  = sceneW * 0.02;   // starting position ~2% from left
+    const startLeft  = sceneW * 0.06;   // starting position ~2% from left
     const travelDist = targetLeft - startLeft;
 
     // Duration: fast = short, slow = long
@@ -804,7 +803,7 @@
 
     // Snap car back to start
     carImg.style.transition = 'left 0.4s ease';
-    carImg.style.left = '2%';
+carImg.style.left = '6%';
     setTimeout(() => { carImg.style.transition = 'none'; }, 450);
 
     // Clear overlays
