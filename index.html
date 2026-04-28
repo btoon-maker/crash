@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crash Test Lab — SINS Science</title>
+  <style>
+    /* ============================================================
+       CRASH TEST LAB  •  5th Grade SINS Science
+       Color Palette:
+         Deep Navy    #1F2A44
+         Safety Orange #F97316
+         Electric Blue #3B82F6
+         Off White    #F8FAFC
+         Light Gray   #E5E7EB
+         Steel Gray   #6B7280
+    ============================================================ */
+
+    @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap');
+
+    :root {
+      --navy:   #1F2A44;
+      --orange: #F97316;
+      --blue:   #3B82F6;
+      --white:  #F8FAFC;
+      --lgray:  #E5E7EB;
+      --sgray:  #6B7280;
+      --red:    #EF4444;
+      --green:  #22C55E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      padding: 0 0 40px;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      background: linear-gradient(135deg, #111827 0%, #1F2A44 60%, #1e3a5f 100%);
+      padding: 18px 20px 14px;
+      border-bottom: 4px solid var(--orange);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .lab-icon {
+      font-size: 2.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 8px var(--orange));
+    }
+    .header-text h1 {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      letter-spacing: 2px;
+      color: var(--orange);
+      text-shadow: 2px 2px 0 #000;
+    }
+    .header-text p {
+      font-size: 0.85rem;
+      color: var(--lgray);
+      font-weight: 600;
+    }
+
+    /* ---- OBJECTIVE BANNER ---- */
+    .objective {
+      background: var(--blue);
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .objective span { opacity: 0.85; font-weight: 600; }
+
+    /* ---- MAIN LAYOUT ---- */
+    main {
+      max-width: 900px;
+      margin: 24px auto 0;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* ---- CARD ---- */
+    .card {
+      background: #243350;
+      border-radius: 16px;
+      border: 1.5px solid #334a6e;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #1a2840;
+      padding: 10px 18px;
+      font-family: 'Bangers', cursive;
+      font-size: 1.15rem;
+      letter-spacing: 1.5px;
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #334a6e;
+    }
+    .card-body { padding: 18px; }
+
+    /* ---- TRACK SCENE ---- */
+    #track-scene {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: #1a2840;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #334a6e;
+    }
+
+    /* 
+      ============================================================
+      IMAGE FILE REFERENCES — update these src paths if you 
+      rename or move your image files:
+
+        Track background : images/unnamed__9_.jpg  (the empty lab / barrier)
+        Car image        : images/unnamed__10_.jpg (car with crash dots, side view)
+      ============================================================
+    */
+    #track-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+    }
+
+    #car-img {
+      position: absolute;
+      bottom: 18px;
+      /* Start position: left edge, centered vertically */
+      left: 2%;
+      height: 130px;
+      width: auto;
+      object-fit: contain;
+      transition: none;
+      z-index: 5;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    }
+
+    /* Crash flash overlay */
+    #crash-flash {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 50%, rgba(249,115,22,0.85) 0%, rgba(239,68,68,0.4) 40%, transparent 70%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+      transition: opacity 0.1s;
+    }
+
+    /* Damage overlay on car */
+    #damage-overlay {
+      position: absolute;
+      bottom: 18px;
+      left: 2%;
+      height: 130px;
+      width: auto;
+      z-index: 6;
+      opacity: 0;
+      font-size: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Speed indicator badge */
+    #speed-badge {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: rgba(0,0,0,0.65);
+      border: 2px solid var(--orange);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      color: var(--orange);
+      z-index: 8;
+    }
+
+    /* Spark particles container */
+    #sparks {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9;
+    }
+    .spark {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkFly 0.6s ease-out forwards;
+    }
+    @keyframes sparkFly {
+      0%   { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0.1); opacity: 0; }
+    }
+
+    /* ---- CONTROLS ---- */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: flex-end;
+    }
+    .slider-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+    .slider-label .slow { color: var(--green); }
+    .slider-label .fast { color: var(--red); }
+    .slider-label .mid  { color: var(--orange); font-size: 1rem; }
+
+    input[type=range] {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(to right, var(--green), var(--orange), var(--red));
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--navy);
+      box-shadow: 0 0 0 3px var(--orange);
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 0 5px rgba(249,115,22,0.4);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--navy);
+      box-shadow: 0 0 0 3px var(--orange);
+      cursor: pointer;
+    }
+
+    /* Speed level pill */
+    #speed-level-pill {
+      display: inline-block;
+      padding: 3px 14px;
+      border-radius: 99px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-top: 8px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .pill-slow   { background: #166534; color: #bbf7d0; }
+    .pill-medium { background: #92400e; color: #fed7aa; }
+    .pill-fast   { background: #991b1b; color: #fecaca; }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-run {
+      background: var(--orange);
+      color: #fff;
+      font-size: 1.05rem;
+      letter-spacing: 0.5px;
+    }
+    .btn-reset {
+      background: #334a6e;
+      color: var(--lgray);
+    }
+
+    /* ---- RESULT CARD ---- */
+    #result-section {
+      display: none;
+    }
+    #result-section.visible { display: block; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .result-tile {
+      background: #1a2840;
+      border-radius: 12px;
+      padding: 14px 16px;
+      border: 1.5px solid #334a6e;
+    }
+    .result-tile .tile-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--sgray);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .result-tile .tile-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+    .result-tile .tile-icon { font-size: 1.6rem; margin-bottom: 4px; }
+
+    /* Damage meter bar */
+    .damage-bar-wrap {
+      margin-top: 4px;
+      background: #334a6e;
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .damage-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1s ease;
+    }
+    .dmg-low  { background: var(--green); }
+    .dmg-med  { background: var(--orange); }
+    .dmg-high { background: var(--red); }
+
+    /* ---- JOURNAL ---- */
+    .journal-prompt {
+      background: rgba(59,130,246,0.12);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.55;
+      color: #bfdbfe;
+    }
+    .journal-prompt strong { color: var(--white); }
+
+    textarea#journal {
+      width: 100%;
+      min-height: 110px;
+      background: #1a2840;
+      border: 2px solid #334a6e;
+      border-radius: 10px;
+      color: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    textarea#journal:focus { border-color: var(--blue); }
+    textarea#journal::placeholder { color: var(--sgray); }
+
+    .journal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    #save-status {
+      font-size: 0.78rem;
+      color: var(--sgray);
+      font-style: italic;
+    }
+    #save-status.saved { color: var(--green); }
+
+    /* ---- HISTORY TABLE ---- */
+    #history-section {
+      display: none;
+    }
+    #history-section.visible { display: block; }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .history-table th {
+      background: #1a2840;
+      padding: 8px 12px;
+      text-align: left;
+      color: var(--orange);
+      font-family: 'Bangers', cursive;
+      letter-spacing: 1px;
+      font-size: 0.95rem;
+      border-bottom: 2px solid #334a6e;
+    }
+    .history-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #334a6e;
+      vertical-align: middle;
+    }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:nth-child(even) td { background: rgba(0,0,0,0.15); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 560px) {
+      #track-scene { height: 170px; }
+      #car-img, #damage-overlay { height: 95px; bottom: 12px; }
+      .btn { padding: 10px 18px; font-size: 0.92rem; }
+      header { padding: 14px 14px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header>
+  <div class="lab-icon">🚗</div>
+  <div class="header-text">
+    <h1>⚡ Crash Test Lab</h1>
+    <p>5th Grade SINS Science — Forces &amp; Motion Unit</p>
+  </div>
+</header>
+
+<!-- Objective Banner -->
+<div class="objective">
+  🎯 <span><strong>Learning Goal:</strong> Investigate how changing an object's speed affects the outcome of a collision.</span>
+</div>
+
+<!-- ===================== MAIN ===================== -->
+<main>
+
+  <!-- SIMULATION CARD -->
+  <div class="card">
+    <div class="card-header">🏁 Step 1 — Set Your Speed &amp; Run the Test</div>
+    <div class="card-body">
+
+      <!-- TRACK SCENE -->
+      <div id="track-scene">
+        <!--
+          ============================================================
+          TO REPLACE IMAGES:
+            Track background  → change src to your file path for the
+                                 empty lab image (unnamed__9_.jpg)
+            Car               → change src to your file path for the
+                                 car with crash-test dots (unnamed__10_.jpg)
+          ============================================================
+        -->
+        <img id="track-bg" src="unnamed__9_.jpg" alt="Crash test laboratory track" />
+        <img id="car-img"  src="unnamed__10_.jpg" alt="Crash test vehicle" />
+        <div id="damage-overlay"></div>
+        <div id="crash-flash"></div>
+        <canvas id="sparks"></canvas>
+        <div id="speed-badge">⚡ READY</div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="controls-row" style="margin-top:18px;">
+        <div class="slider-group">
+          <div class="slider-label">
+            <span class="slow">🐢 Slow</span>
+            <span class="mid" id="speed-display">Speed: 3</span>
+            <span class="fast">Fast 🐆</span>
+          </div>
+          <input type="range" id="speed-slider" min="1" max="10" value="3" step="1" />
+          <div>
+            <span id="speed-level-pill" class="pill-slow">LOW SPEED</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+          <button class="btn btn-run" id="run-btn" onclick="runTest()">▶ Run Test</button>
+          <button class="btn btn-reset" id="reset-btn" onclick="resetTest()">↺ Reset</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="card" id="result-section">
+    <div class="card-header">📊 Step 2 — Crash Results</div>
+    <div class="card-body">
+      <div class="result-grid" id="result-grid">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JOURNAL CARD -->
+  <div class="card" id="result-section-journal">
+    <div class="card-header">📓 Step 3 — Scientist Journal</div>
+    <div class="card-body">
+      <div class="journal-prompt">
+        <strong>Think &amp; Write:</strong> What changed as the speed changed?
+        What do you think is happening to the forces during each crash?
+        What might this mean for what happens to the people inside the car?
+      </div>
+      <textarea id="journal" placeholder="Write your observations here…  (Try running the test at different speeds and compare!)"></textarea>
+      <div class="journal-footer">
+        <span id="save-status">Not yet saved</span>
+        <button class="btn btn-reset" style="padding:7px 16px; font-size:0.83rem;" onclick="saveJournal()">💾 Save Response</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY CARD -->
+  <div class="card" id="history-section">
+    <div class="card-header">🗂️ Test History — Compare Your Results</div>
+    <div class="card-body" style="overflow-x:auto;">
+      <table class="history-table" id="history-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Speed Level</th>
+            <th>Speed Value</th>
+            <th>Damage Level</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody id="history-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+  /* ============================================================
+     CRASH TEST LAB  -  JavaScript Logic
+     No external libraries. Pure vanilla JS.
+  ============================================================ */
+
+  // ----- State -----
+  let isRunning = false;
+  let testCount = 0;
+  let animationId = null;
+
+  // DOM refs
+  const carImg      = document.getElementById('car-img');
+  const crashFlash  = document.getElementById('crash-flash');
+  const speedSlider = document.getElementById('speed-slider');
+  const speedDisplay= document.getElementById('speed-display');
+  const speedPill   = document.getElementById('speed-level-pill');
+  const speedBadge  = document.getElementById('speed-badge');
+  const runBtn      = document.getElementById('run-btn');
+  const resetBtn    = document.getElementById('reset-btn');
+  const sparksCanvas= document.getElementById('sparks');
+  const resultSection = document.getElementById('result-section');
+  const historySection= document.getElementById('history-section');
+
+  // ----- Crash data by speed tier -----
+  const crashData = {
+    slow: {
+      label: 'LOW SPEED',
+      icon: '🟢',
+      damageIcon: '🟢',
+      damage: 'Minor Dent',
+      description: 'The car barely nudges the barrier. Small bump — not much force.',
+      pillClass: 'pill-slow',
+      damageClass: 'dmg-low',
+      damagePct: 18,
+      sparkCount: 4,
+      sparkColors: ['#22C55E','#86efac','#fff'],
+      shakeAmount: 4,
+      badgeColor: '#166534',
+      emoji: '😊',
+    },
+    medium: {
+      label: 'MEDIUM SPEED',
+      icon: '🟡',
+      damageIcon: '🟡',
+      damage: 'Visible Damage',
+      description: 'A solid impact! The bumper crumples and some parts bend.',
+      pillClass: 'pill-medium',
+      damageClass: 'dmg-med',
+      damagePct: 55,
+      sparkCount: 10,
+      sparkColors: ['#F97316','#fcd34d','#fff'],
+      shakeAmount: 9,
+      badgeColor: '#92400e',
+      emoji: '😬',
+    },
+    fast: {
+      label: 'HIGH SPEED',
+      icon: '🔴',
+      damageIcon: '🔴',
+      damage: 'Severe Damage',
+      description: 'HUGE crash! The car crumples badly. Much more force — very dangerous.',
+      pillClass: 'pill-fast',
+      damageClass: 'dmg-high',
+      damagePct: 92,
+      sparkCount: 22,
+      sparkColors: ['#EF4444','#F97316','#fcd34d','#fff'],
+      shakeAmount: 18,
+      badgeColor: '#991b1b',
+      emoji: '😱',
+    }
+  };
+
+  // History log
+  let history = [];
+
+  // ----- Slider listener -----
+  speedSlider.addEventListener('input', () => {
+    const v = parseInt(speedSlider.value);
+    speedDisplay.textContent = 'Speed: ' + v;
+    const tier = getTier(v);
+    speedPill.textContent = crashData[tier].label;
+    speedPill.className   = 'speed-level-pill ' + crashData[tier].pillClass;
+    speedBadge.textContent= '⚡ ' + crashData[tier].label;
+  });
+
+  function getTier(v) {
+    if (v <= 3)  return 'slow';
+    if (v <= 7)  return 'medium';
+    return 'fast';
+  }
+
+  // ----- Main run function -----
+  function runTest() {
+    if (isRunning) return;
+    isRunning = true;
+    runBtn.disabled = true;
+    resetBtn.disabled = true;
+
+    const speed    = parseInt(speedSlider.value);
+    const tier     = getTier(speed);
+    const data     = crashData[tier];
+
+    // Hide previous result
+    resultSection.classList.remove('visible');
+
+    // Get track scene and car dimensions
+    const scene    = document.getElementById('track-scene');
+    const sceneW   = scene.offsetWidth;
+    const carW     = carImg.offsetWidth;
+
+    // We want the car to stop at ~72% of scene width (roughly at the barrier)
+    // ============================================================
+    // NOTE: If your barrier image is at a different horizontal position,
+    // adjust the targetPct below (0.0 = left edge, 1.0 = right edge)
+    // ============================================================
+    const targetPct = 0.68;
+    const targetLeft = sceneW * targetPct - carW;
+
+    const startLeft  = sceneW * 0.02;   // starting position ~2% from left
+    const travelDist = targetLeft - startLeft;
+
+    // Duration: fast = short, slow = long
+    // speed 1→10, duration 3500→700 ms
+    const duration   = 3500 - (speed - 1) * 311;
+
+    speedBadge.textContent = '⚡ ' + data.label + ' — RUNNING';
+
+    let startTime = null;
+
+    function animate(ts) {
+      if (!startTime) startTime = ts;
+      const elapsed  = ts - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-in: starts slow, accelerates
+      const eased = progress * progress;
+
+      carImg.style.left = (startLeft + travelDist * eased) + 'px';
+
+      if (progress < 1) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        // Impact!
+        onImpact(tier, data, speed, targetLeft);
+      }
+    }
+
+    animationId = requestAnimationFrame(animate);
+  }
+
+  // ----- Impact handler -----
+  function onImpact(tier, data, speed, finalLeft) {
+    // Shake the car
+    shake(carImg, data.shakeAmount, 500);
+
+    // Flash overlay
+    crashFlash.style.opacity = tier === 'fast' ? '1' : tier === 'medium' ? '0.65' : '0.3';
+    setTimeout(() => { crashFlash.style.opacity = '0'; }, 350);
+
+    // Sparks
+    spawnSparks(finalLeft + carImg.offsetWidth, carImg.offsetTop + carImg.offsetHeight * 0.35, data);
+
+    // Update badge
+    speedBadge.textContent = '💥 IMPACT!';
+
+    // After brief pause, show result
+    setTimeout(() => {
+      showResult(tier, data, speed);
+    }, 600);
+  }
+
+  // ----- Show result tiles -----
+  function showResult(tier, data, speed) {
+    testCount++;
+
+    // Add to history
+    history.push({ num: testCount, tier, label: data.label, speed, damage: data.damage, outcome: data.description });
+    renderHistory();
+
+    // Build result tiles
+    const grid = document.getElementById('result-grid');
+    grid.innerHTML = `
+      <div class="result-tile">
+        <div class="tile-icon">⚡</div>
+        <div class="tile-label">Speed Selected</div>
+        <div class="tile-value" style="color:var(--orange);">Level ${speed} / 10</div>
+        <div class="tile-value" style="font-size:0.85rem;color:var(--sgray);margin-top:3px;">${data.label}</div>
+      </div>
+      <div class="result-tile">
+        <div class="tile-icon">${data.emoji}</div>
+        <div class="tile-label">Crash Outcome</div>
+        <div class="tile-value">${data.damage}</div>
+        <div class="tile-value" style="font-size:0.82rem;color:var(--sgray);margin-top:3px;font-weight:600;line-height:1.4;">${data.description}</div>
+      </div>
+      <div class="result-tile">
+        <div class="tile-icon">📏</div>
+        <div class="tile-label">Damage Level</div>
+        <div class="tile-value" style="margin-bottom:6px;">${data.damagePct}%</div>
+        <div class="damage-bar-wrap">
+          <div class="damage-bar ${data.damageClass}" style="width:0%" id="dmg-bar"></div>
+        </div>
+      </div>
+    `;
+
+    resultSection.classList.add('visible');
+    historySection.classList.add('visible');
+
+    // Animate bar after paint
+    setTimeout(() => {
+      const bar = document.getElementById('dmg-bar');
+      if (bar) bar.style.width = data.damagePct + '%';
+    }, 80);
+
+    speedBadge.textContent = data.damageIcon + ' ' + data.label;
+
+    isRunning = false;
+    runBtn.disabled = false;
+    resetBtn.disabled = false;
+  }
+
+  // ----- Render history table -----
+  function renderHistory() {
+    const tbody = document.getElementById('history-body');
+    tbody.innerHTML = '';
+    history.forEach(h => {
+      const colors = { slow:'#22C55E', medium:'#F97316', fast:'#EF4444' };
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:var(--sgray);font-weight:700;">Test ${h.num}</td>
+        <td style="color:${colors[h.tier]};font-weight:800;">${h.label}</td>
+        <td style="text-align:center;font-weight:700;">${h.speed}/10</td>
+        <td style="color:${colors[h.tier]};">${h.damage}</td>
+        <td style="font-size:0.82rem;color:var(--lgray);">${h.outcome}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ----- Reset -----
+  function resetTest() {
+    if (isRunning) {
+      cancelAnimationFrame(animationId);
+      isRunning = false;
+    }
+
+    // Snap car back to start
+    carImg.style.transition = 'left 0.4s ease';
+    carImg.style.left = '2%';
+    setTimeout(() => { carImg.style.transition = 'none'; }, 450);
+
+    // Clear overlays
+    crashFlash.style.opacity = '0';
+    const damageOverlay = document.getElementById('damage-overlay');
+    damageOverlay.style.opacity = '0';
+    clearSparks();
+
+    speedBadge.textContent = '⚡ READY';
+    runBtn.disabled = false;
+    resetBtn.disabled = false;
+
+    // Hide result card (keep history)
+    resultSection.classList.remove('visible');
+  }
+
+  // ----- Shake animation -----
+  function shake(el, amount, duration) {
+    const start = performance.now();
+    const origLeft = parseFloat(el.style.left) || 0;
+
+    function doShake(ts) {
+      const elapsed   = ts - start;
+      const progress  = elapsed / duration;
+      if (progress >= 1) {
+        el.style.left = origLeft + 'px';
+        return;
+      }
+      const decay  = 1 - progress;
+      const offset = Math.sin(progress * Math.PI * 12) * amount * decay;
+      el.style.left = (origLeft + offset) + 'px';
+      requestAnimationFrame(doShake);
+    }
+    requestAnimationFrame(doShake);
+  }
+
+  // ----- Spark particles -----
+  function spawnSparks(x, y, data) {
+    const scene  = document.getElementById('track-scene');
+    const sceneR = scene.getBoundingClientRect();
+    const canvas = sparksCanvas;
+    canvas.width  = scene.offsetWidth;
+    canvas.height = scene.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const count = data.sparkCount;
+    const colors = data.sparkColors;
+
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.random() * Math.PI) - Math.PI * 0.9;
+      const dist  = 30 + Math.random() * 80;
+      const dx    = Math.cos(angle) * dist;
+      const dy    = Math.sin(angle) * dist - 20;
+      const size  = 4 + Math.random() * 8;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const start = Date.now();
+      const sparkDur = 400 + Math.random() * 300;
+
+      (function drawSpark(sx, sy, sdx, sdy, ssize, scolor, sstart, sdur) {
+        function frame() {
+          const elapsed = Date.now() - sstart;
+          const t = elapsed / sdur;
+          if (t >= 1) return;
+          ctx.save();
+          ctx.globalAlpha = 1 - t;
+          ctx.fillStyle = scolor;
+          ctx.beginPath();
+          ctx.arc(sx + sdx * t, sy + sdy * t + 60 * t * t, ssize * (1 - t * 0.7), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          requestAnimationFrame(frame);
+        }
+        frame();
+      })(x, y, dx, dy, size, color, start, sparkDur);
+    }
+
+    // Clear canvas after sparks finish
+    setTimeout(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, 800);
+  }
+
+  function clearSparks() {
+    const canvas = sparksCanvas;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // ----- Journal: save / load from localStorage -----
+  const journalTA = document.getElementById('journal');
+  const saveStatus= document.getElementById('save-status');
+
+  // Load saved journal on page open
+  (function loadJournal() {
+    try {
+      const saved = localStorage.getItem('crashLabJournal');
+      if (saved) {
+        journalTA.value = saved;
+        saveStatus.textContent = 'Previous response loaded ✓';
+        saveStatus.className = 'saved';
+      }
+    } catch(e) {}
+  })();
+
+  function saveJournal() {
+    try {
+      localStorage.setItem('crashLabJournal', journalTA.value);
+      saveStatus.textContent = '✓ Saved to this device!';
+      saveStatus.className   = 'saved';
+      setTimeout(() => {
+        saveStatus.textContent = 'Saved ✓';
+      }, 2200);
+    } catch(e) {
+      saveStatus.textContent = 'Could not save (storage unavailable)';
+    }
+  }
+
+  // Auto-save on change
+  journalTA.addEventListener('input', () => {
+    saveStatus.textContent = 'Unsaved changes…';
+    saveStatus.className   = '';
+  });
+
+  // ----- Init slider display -----
+  speedSlider.dispatchEvent(new Event('input'));
+</script>
+</body>
+</html>
